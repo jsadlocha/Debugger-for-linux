@@ -153,6 +153,21 @@ void Debugger::continueExecution()
     throw "Cannot resume process!\n";
 }
 
+void Debugger::continueExecutionUntilHitBreakpoint()
+{
+  while(1)
+  {
+    singleStep();
+    wait();
+    readRegisters();
+    if (isSoftBreakpointExistInMap(regs.rip))
+    {
+      std::cout<<"Breakpoint hit at address: 0x"<<std::hex<<regs.rip<<std::endl;
+      break;
+    }
+  }
+}
+
 void Debugger::singleStep()
 {
   int ret = ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
@@ -246,5 +261,47 @@ void Debugger::moduleLocation()
 
 void Debugger::breakpointSoftware(uint64_t addr)
 {
+  addBreakpoint(addr);
+}
+
+void Debugger::breakpointHit()
+{
+  readRegisters();
+  if(!isSoftBreakpointExistInMap(regs.rip))
+    return;
   
+  removeBreakpoint(regs.rip);
+  // regs.rip -= 1;
+  // setRegisters();
+}
+
+void Debugger::addBreakpoint(uint64_t addr)
+{
+  if (isSoftBreakpointExistInMap(addr))
+    return;
+
+  uint8_t opcode = '\xc3';
+  uint64_t instr = readWord(addr);
+  if (instr == 0)
+    return;
+
+  breakpoint_list[addr] = instr;
+  instr &= ~0xFF;
+  instr |= opcode;
+  writeWord(addr, instr);
+}
+
+void Debugger::removeBreakpoint(uint64_t addr)
+{
+  if (!isSoftBreakpointExistInMap(addr))
+    return;
+
+  uint64_t bp = breakpoint_list.at(addr);
+  writeWord(addr, bp);
+  breakpoint_list.erase(addr);
+}
+
+bool Debugger::isSoftBreakpointExistInMap(uint64_t addr)
+{
+  return breakpoint_list.find(addr) != breakpoint_list.end();
 }

@@ -2,6 +2,7 @@
 #ifndef __TOOLS_DEBUGGER_HPP
 #define __TOOLS_DEBUGGER_HPP
 #include <vector>
+#include <map>
 #include "memory.hpp"
 
 namespace tools
@@ -10,6 +11,7 @@ namespace tools
   {
   private:
     std::vector<MemoryObject> mem_mapping;
+    std::map<uint64_t, u_int64_t> breakpoint_list;
 
   public:
     user_regs_struct regs;
@@ -51,6 +53,7 @@ namespace tools
 
     uint64_t swapEndian(uint64_t value);
 
+    void continueExecutionUntilHitBreakpoint();
     void continueExecution();
     void singleStep();
     void syscallStep();
@@ -66,6 +69,10 @@ namespace tools
     // MemoryObject parseLine(std::ifstream &);
 
     void breakpointSoftware(uint64_t addr);
+    void addBreakpoint(uint64_t addr);
+    void removeBreakpoint(uint64_t addr);
+    bool isSoftBreakpointExistInMap(uint64_t addr);
+    void breakpointHit();
   };
 }
 #endif

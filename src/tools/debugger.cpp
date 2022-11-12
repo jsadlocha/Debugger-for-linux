@@ -13,12 +13,7 @@
 
 using namespace tools;
 
-union type_u
-{
-  uint64_t v;
-  unsigned char b[sizeof(v)];
-};
-
+// TODO: choice between const functions or object debugger.
 Debugger::Debugger()
 {
   std::cout << "hello debugger" << std::endl;
@@ -44,6 +39,7 @@ void Debugger::detach()
     throw "Cannot detach the process!\n";
 }
 
+// TODO: add sending signals
 void Debugger::stopTheProcess()
 {
 }
@@ -72,6 +68,8 @@ void Debugger::setRegisters(user_regs_struct &regs_struct)
     throw "Cannot set registers\n";
 }
 
+
+// TODO: debug function
 void Debugger::printRegisters()
 {
   readRegisters();
@@ -106,45 +104,44 @@ uint64_t Debugger::readWord(uint64_t addr)
   return ret;
 }
 
+// TODO: remove debug printing and return byte array
 void Debugger::read(uint64_t addr, uint8_t num)
 {
   uint64_t value;
   for(auto i = 0; i < num; ++i)
   {
     value = readWord(addr);
-    printHex(value);
+    printHexCString(value);
     addr += 0x8;
   }
 }
 
 uint64_t Debugger::swapEndian(uint64_t value)
 {
-  type_u src, dst;
+  uint64_to_arr_byte src, dst;
   
-  src.v = value;
+  src.u_int64 = value;
 
   for(auto i = 0; i < 8; i++)
   {
-    dst.b[i] = src.b[8 - i - 1];
+    dst.arr[i] = src.arr[8 - i - 1];
   }
 
-  return dst.v;
+  return dst.u_int64;
 }
 
-void Debugger::printHex(uint64_t value)
+void Debugger::printHexCString(uint64_t value)
 {
-  union type_u
-  {
-    uint64_t v;
-    unsigned char b[sizeof(v)];
-  } d;
-  d.v = value;
+  uint64_to_arr_byte data;
+  data.u_int64 = value;
 
   std::cout<<std::hex;
   for(auto i = 0; i < 8; ++i)
-    std::cout<<"\\x"<<(d.b[i] & 0xff); 
+    std::cout<<"\\x"<<(data.arr[i] & 0xff); 
 }
 
+
+// TODO: doesen't work need more test
 void Debugger::continueExecution()
 {
   int ret = ptrace(PTRACE_CONT, pid, nullptr, nullptr);
@@ -176,6 +173,13 @@ void Debugger::singleStep()
     throw "Cannot continue execution!\n";
 }
 
+// TODO: Implement
+void Debugger::singleSourceCodeStep()
+{
+
+}
+
+// TODO: more test more behavior
 void Debugger::syscallStep()
 {
   int ret = ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);
@@ -189,7 +193,7 @@ void Debugger::wait()
   waitpid(pid, nullptr, 0);
 }
 
-
+// TODO: Maybe throw to another file
 void Debugger::loadMemoryMap()
 { 
   mem_mapping.reserve(64);
@@ -259,11 +263,13 @@ void Debugger::moduleLocation()
   }
 }
 
+// TODO: Change name
 void Debugger::breakpointSoftware(uint64_t addr)
 {
   addBreakpoint(addr);
 }
 
+// TODO: is prabobly better to readRegister in other place in middleware
 void Debugger::breakpointHit()
 {
   readRegisters();
@@ -271,8 +277,6 @@ void Debugger::breakpointHit()
     return;
   
   removeBreakpoint(regs.rip);
-  // regs.rip -= 1;
-  // setRegisters();
 }
 
 void Debugger::addBreakpoint(uint64_t addr)

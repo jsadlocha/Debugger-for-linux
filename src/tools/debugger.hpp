@@ -7,6 +7,14 @@
 
 namespace tools
 {
+
+  union uint64_to_arr_byte
+  {
+    uint64_t u_int64;
+    unsigned char arr[sizeof(u_int64)];
+  };
+
+  // TODO: sort method by category
   class Debugger
   {
   private:
@@ -49,13 +57,14 @@ namespace tools
     void read(uint64_t, uint8_t);
     void write(uint64_t);
 
-    void printHex(uint64_t);
+    void printHexCString(uint64_t);
 
     uint64_t swapEndian(uint64_t value);
 
     void continueExecutionUntilHitBreakpoint();
     void continueExecution();
     void singleStep();
+    void singleSourceCodeStep();
     void syscallStep();
     void wait();
 

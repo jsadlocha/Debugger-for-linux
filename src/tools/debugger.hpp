@@ -14,7 +14,9 @@ namespace tools
     unsigned char arr[sizeof(u_int64)];
   };
 
-  // TODO: sort method by category
+  // TODO: add debugger builder/factory
+  
+  // TODO: sort method by category and add docs comments
   class Debugger
   {
   private:
@@ -40,6 +42,7 @@ namespace tools
     void attach(pid_t);
     void detach();
     void stopTheProcess();
+    void setOptionsTraceExec();
 
     void readRegisters();
     void setRegisters();
@@ -54,7 +57,7 @@ namespace tools
      * param addr count
      * 
      */
-    void read(uint64_t, uint8_t);
+    std::vector<uint64_t> read(uint64_t, uint8_t);
     void write(uint64_t);
 
     void printHexCString(uint64_t);
@@ -82,6 +85,9 @@ namespace tools
     void removeBreakpoint(uint64_t addr);
     bool isSoftBreakpointExistInMap(uint64_t addr);
     void breakpointHit();
+
+    void executeOpcode(std::vector<uint8_t> &code);
+    std::vector<uint64_t> convert8To64ByteVector(std::vector<uint8_t> &code);
   };
 }
 #endif

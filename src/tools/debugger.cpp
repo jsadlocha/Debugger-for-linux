@@ -14,6 +14,7 @@
 using namespace tools;
 
 // TODO: choice between const functions or object debugger.
+// Or add factory/builder pattern for handling creating object error
 Debugger::Debugger()
 {
   std::cout << "hello debugger" << std::endl;
@@ -42,6 +43,14 @@ void Debugger::detach()
 // TODO: add sending signals
 void Debugger::stopTheProcess()
 {
+}
+
+void Debugger::setOptionsTraceExec()
+{
+  int ret = ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_TRACEEXEC);
+
+  if (ret < 0)
+    throw "Cannot redirect signal from tracee\n";
 }
 
 void Debugger::readRegisters()
@@ -105,15 +114,18 @@ uint64_t Debugger::readWord(uint64_t addr)
 }
 
 // TODO: remove debug printing and return byte array
-void Debugger::read(uint64_t addr, uint8_t num)
+std::vector<uint64_t> Debugger::read(uint64_t addr, uint8_t num)
 {
-  uint64_t value;
+  std::vector<uint64_t> buf;
+  buf.reserve(num);
+
   for(auto i = 0; i < num; ++i)
   {
-    value = readWord(addr);
-    printHexCString(value);
+    buf.push_back(readWord(addr));
     addr += 0x8;
   }
+
+  return buf;
 }
 
 uint64_t Debugger::swapEndian(uint64_t value)
@@ -308,4 +320,56 @@ void Debugger::removeBreakpoint(uint64_t addr)
 bool Debugger::isSoftBreakpointExistInMap(uint64_t addr)
 {
   return breakpoint_list.find(addr) != breakpoint_list.end();
+}
+
+
+void Debugger::executeOpcode(std::vector<uint8_t> &code)
+{
+  readRegisters();
+  auto addr = regs.rip;
+  auto opcode = convert8To64ByteVector(code);
+  auto len_word = opcode.size();
+
+  auto old_opcode = read(addr, len_word);
+
+  // write new_opcode
+
+  // step until hit address after len_word bytes
+
+  // restore old_opcode
+
+  // restore rip addres and all registers
+
+  // return
+}
+
+
+// maybe simply make reinterpret_cast as in C
+std::vector<uint64_t> Debugger::convert8To64ByteVector(std::vector<uint8_t> &code)
+{
+  std::vector<uint64_t> buf;
+  uint64_to_arr_byte tmp;
+  size_t len_opcode = code.size();
+  size_t num_of_word = (len_opcode/8)+1;
+  buf.reserve(num_of_word);
+
+  size_t el_num = 0;
+  auto align = '\x90'; // nop instruction
+  for(auto i = 0; i < num_of_word; ++i)
+  {
+    for(auto j = 0; j < 8; ++j)
+    {
+      el_num += 1;
+      if (el_num > len_opcode)
+      {
+        tmp.arr[j] = align;
+      }
+      else
+      {
+        tmp.arr[j] = code[el_num-1];
+      }
+    }
+    buf.push_back(swapEndian(tmp.u_int64));
+  }
+  return buf;
 }

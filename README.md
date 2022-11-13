@@ -6,12 +6,13 @@ building in progress...
 
 
 # Features:
-  - Running binary ✅
+  - Running binary ❌
   - Attach to the process by pid ✅
   - Reading/Writing to the registers ✅
   - Reading/Writing to arbitrary memory ✅
   - Software breakpoints ✅
   - Hardware breakpoints ❌
+  - Syscall Entry/Exit info ❌
   - Disassembler ❌
   - Running assembly snippets ❌
   - Running arbitrary binary ❌

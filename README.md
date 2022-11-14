@@ -14,7 +14,7 @@ building in progress...
   - Hardware breakpoints ❌
   - Syscall Entry/Exit info ❌
   - Disassembler ❌
-  - Running assembly snippets ❌
+  - Running assembly snippets ✅
   - Running arbitrary binary ❌
   - Running python scripts ❌
   - Memory module map ✅

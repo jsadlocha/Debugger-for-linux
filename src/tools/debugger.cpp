@@ -128,6 +128,15 @@ std::vector<uint64_t> Debugger::read(uint64_t addr, uint8_t num)
   return buf;
 }
 
+void Debugger::write(uint64_t addr, std::vector<uint64_t> &data)
+{
+  for(auto &word : data)
+  {
+    writeWord(addr, word);
+    addr += 0x8;
+  }
+}
+
 uint64_t Debugger::swapEndian(uint64_t value)
 {
   uint64_to_arr_byte src, dst;
@@ -322,25 +331,38 @@ bool Debugger::isSoftBreakpointExistInMap(uint64_t addr)
   return breakpoint_list.find(addr) != breakpoint_list.end();
 }
 
-
+// execute opcode behind with safekeeping main program registers
 void Debugger::executeOpcode(std::vector<uint8_t> &code)
 {
   readRegisters();
+  auto old_regs = regs;
   auto addr = regs.rip;
   auto opcode = convert8To64ByteVector(code);
   auto len_word = opcode.size();
+  auto end_addr = addr + (opcode.size()*8);
 
+  // read old code in that place
   auto old_opcode = read(addr, len_word);
 
   // write new_opcode
+  write(addr, opcode);
 
   // step until hit address after len_word bytes
+  while (1)
+  {
+    readRegisters();
+    if(regs.rip == end_addr)
+      break;
+
+    singleStep();
+    wait();
+  }
 
   // restore old_opcode
+  write(addr, old_opcode);
 
   // restore rip addres and all registers
-
-  // return
+  setRegisters(old_regs);
 }
 
 

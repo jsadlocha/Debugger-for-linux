@@ -58,7 +58,7 @@ namespace tools
      * 
      */
     std::vector<uint64_t> read(uint64_t, uint8_t);
-    void write(uint64_t);
+    void write(uint64_t, std::vector<uint64_t> &);
 
     void printHexCString(uint64_t);
 

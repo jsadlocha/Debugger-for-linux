@@ -4,6 +4,7 @@ Debugger and code injector for linux system
 
 building in progress...
 
+Probably project will be converted into the hacking framework, as universal C++ high level module.
 
 # Features:
   - Running binary ❌
@@ -22,4 +23,8 @@ building in progress...
   - Memory scanning ❌
   - Source code mapping with dwarf symbols ❌
   - Mapping arbitrary memory objects to python binds ❌
+  - JIT compiling arbitrary code ❌
+  - Graph execution modeling ❌
+  - SMT solving execution branches ❌
+  - Reverse execution/backtracking ❌
   - Simple GUI ❌

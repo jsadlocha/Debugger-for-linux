@@ -209,9 +209,10 @@ void Debugger::syscallStep()
     throw "cannot syscall breakpoints\n";
 }
 
-void Debugger::wait()
+int Debugger::wait()
 {
-  waitpid(pid, nullptr, 0);
+  waitpid(pid, &status, 0);
+  return status;
 }
 
 // TODO: Maybe throw to another file
@@ -266,8 +267,6 @@ void Debugger::loadMemoryMap()
   {
     throw "Cannot open memory map file!\n";
   }
-  // for(auto &el : mem_mapping)
-    // el.print();
 }
 
 
@@ -281,6 +280,14 @@ void Debugger::moduleLocation()
   if (itr != mem_mapping.end())
   {
     itr->print();
+  }
+}
+
+void Debugger::printMemoryMaps()
+{
+  for(auto &map : mem_mapping)
+  {
+    map.print();
   }
 }
 
@@ -332,7 +339,7 @@ bool Debugger::isSoftBreakpointExistInMap(uint64_t addr)
 }
 
 // execute opcode behind with safekeeping main program registers
-void Debugger::executeOpcode(std::vector<uint8_t> &code)
+void Debugger::executeOpcode(std::vector<char> &code)
 {
   readRegisters();
   auto old_regs = regs;
@@ -347,14 +354,21 @@ void Debugger::executeOpcode(std::vector<uint8_t> &code)
   // write new_opcode
   write(addr, opcode);
 
+  //
+  // readRegisters();
+  // auto b = read(regs.rip, 8);
+  // for (auto &i : b)
+  //   std::cout<<std::hex<<i;
+  // std::cout<<std::endl;
   // step until hit address after len_word bytes
   while (1)
   {
     readRegisters();
     if(regs.rip == end_addr)
       break;
-
+    
     singleStep();
+    // syscallStep();
     wait();
   }
 
@@ -367,7 +381,7 @@ void Debugger::executeOpcode(std::vector<uint8_t> &code)
 
 
 // maybe simply make reinterpret_cast as in C
-std::vector<uint64_t> Debugger::convert8To64ByteVector(std::vector<uint8_t> &code)
+std::vector<uint64_t> Debugger::convert8To64ByteVector(std::vector<char> &code)
 {
   std::vector<uint64_t> buf;
   uint64_to_arr_byte tmp;
@@ -391,7 +405,7 @@ std::vector<uint64_t> Debugger::convert8To64ByteVector(std::vector<uint8_t> &cod
         tmp.arr[j] = code[el_num-1];
       }
     }
-    buf.push_back(swapEndian(tmp.u_int64));
+    buf.push_back(tmp.u_int64);
   }
   return buf;
 }

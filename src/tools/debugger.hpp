@@ -26,6 +26,7 @@ namespace tools
   public:
     user_regs_struct regs;
     pid_t pid;
+    int status;
 
     Debugger();
     ~Debugger();
@@ -69,7 +70,7 @@ namespace tools
     void singleStep();
     void singleSourceCodeStep();
     void syscallStep();
-    void wait();
+    int wait();
 
     /**
      * @brief Return actually location in memory map based on RIP
@@ -78,6 +79,7 @@ namespace tools
     void loadMemoryMap();
     void moduleLocation();
     void functionLocation();
+    void printMemoryMaps();
     // MemoryObject parseLine(std::ifstream &);
 
     void breakpointSoftware(uint64_t addr);
@@ -86,8 +88,8 @@ namespace tools
     bool isSoftBreakpointExistInMap(uint64_t addr);
     void breakpointHit();
 
-    void executeOpcode(std::vector<uint8_t> &code);
-    std::vector<uint64_t> convert8To64ByteVector(std::vector<uint8_t> &code);
+    void executeOpcode(std::vector<char> &code);
+    std::vector<uint64_t> convert8To64ByteVector(std::vector<char> &code);
   };
 }
 #endif

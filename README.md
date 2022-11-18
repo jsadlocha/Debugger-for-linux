@@ -24,6 +24,7 @@ Probably project will be converted into the hacking framework, as universal C++ 
   - Memory scanning ❌
   - Source code mapping with dwarf symbols ❌
   - Remote debugging ❌
+  - Reference name demangling C++ ✅
   - Mapping arbitrary memory objects to python binds ❌
   - JIT compiling arbitrary code ❌
   - Graph execution modeling ❌

@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <cxxabi.h>
+
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 
@@ -408,4 +410,17 @@ std::vector<uint64_t> Debugger::convert8To64ByteVector(std::vector<char> &code)
     buf.push_back(tmp.u_int64);
   }
   return buf;
+}
+
+std::string Debugger::demangleNameReference(std::string &name)
+{
+  int status;
+  char  *realname;
+  std::string out;
+  
+  realname = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
+  out = status ? "" : realname;
+  free(realname);
+
+  return out;
 }

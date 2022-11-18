@@ -90,6 +90,8 @@ namespace tools
 
     void executeOpcode(std::vector<char> &code);
     std::vector<uint64_t> convert8To64ByteVector(std::vector<char> &code);
+
+    std::string demangleNameReference(std::string &);
   };
 }
 #endif

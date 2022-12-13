@@ -1,13 +1,24 @@
 cmake_minimum_required(VERSION 3.16)
-project(main)
+
+
+set(This, main)
+
+project(${This} C CXX)
+
 set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCE_FILES main.cpp)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
-add_library(DebugLib STATIC src/tools/debugger.cpp src/tools/debugger.hpp)
+enable_testing()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+include_directories(DebugLib src)
 
-target_link_libraries(${PROJECT_NAME} DebugLib)
+add_library(DebugLib SHARED src/tools/debugger.cpp src/tools/debugger.hpp)
+
+add_subdirectory(test)
+
+add_executable(main main.cpp)
+
+target_link_libraries(main DebugLib)
 
 # http://dlib.net/examples/CMakeLists.txt.html
